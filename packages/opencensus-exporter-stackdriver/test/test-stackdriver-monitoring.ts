@@ -176,7 +176,7 @@ describe('Stackdriver Stats Exporter', function() {
     }
 
     exporterOptions = {
-      delay: 0,
+      period: 0,
       projectId: PROJECT_ID,
       logger: exporterTestLogger
     };
@@ -226,15 +226,13 @@ describe('Stackdriver Stats Exporter', function() {
               Measurement = {measure: view.measure, value: 1, tags};
           view.recordMeasurement(measurement);
 
-          await exporter.onRecord([view], measurement)
-              .then(() => {
-                return new Promise((resolve) => setTimeout(resolve, 10));
-              })
-              .then(() => {
-                return assertTimeSeries(
-                    exporterTestLogger.debugBuffer[1][0], view, measurement,
-                    PROJECT_ID);
-              });
+          exporter.onRecord([view], measurement);
+
+          await new Promise((resolve) => setTimeout(resolve, 10)).then(() => {
+            return assertTimeSeries(
+                exporterTestLogger.debugBuffer[1][0], view, measurement,
+                PROJECT_ID);
+          });
         });
       });
     });
@@ -270,15 +268,13 @@ describe('Stackdriver Stats Exporter', function() {
 
         viewTimeSeries.recordMeasurement(measurement);
 
-        await exporter.onRecord([viewTimeSeries], measurement)
-            .then(() => {
-              return new Promise((resolve) => setTimeout(resolve, 10));
-            })
-            .then(() => {
-              return assertTimeSeries(
-                  exporterTestLogger.debugBuffer[0][0], viewTimeSeries,
-                  measurement, PROJECT_ID);
-            });
+        exporter.onRecord([viewTimeSeries], measurement);
+
+        await new Promise((resolve) => setTimeout(resolve, 10)).then(() => {
+          return assertTimeSeries(
+              exporterTestLogger.debugBuffer[0][0], viewTimeSeries, measurement,
+              PROJECT_ID);
+        });
       });
     });
 
@@ -317,7 +313,7 @@ describe('Stackdriver Stats Exporter', function() {
                .reply(403, 'Permission denied');
 
            const failExporter = new StackdriverStatsExporter({
-             delay: 0,
+             period: 0,
              projectId: WRONG_PROJECT_ID,
              onMetricUploadError: (err) => {
                assert.ok(err.message.indexOf('Permission denied') >= 0);
@@ -362,15 +358,13 @@ describe('Stackdriver Stats Exporter', function() {
           nocks.timeSeries(PROJECT_ID, null, null, false);
         }
         viewTimeSeries.recordMeasurement(measurement);
-        await prefixExporter.onRecord([viewTimeSeries], measurement)
-            .then(() => {
-              return new Promise((resolve) => setTimeout(resolve, 10));
-            })
-            .then(() => {
-              return assertTimeSeries(
-                  exporterTestLogger.debugBuffer[0][0], viewTimeSeries,
-                  measurement, PROJECT_ID, prefixExporterOptions.metricPrefix);
-            });
+        prefixExporter.onRecord([viewTimeSeries], measurement);
+
+        await new Promise((resolve) => setTimeout(resolve, 10)).then(() => {
+          return assertTimeSeries(
+              exporterTestLogger.debugBuffer[0][0], viewTimeSeries, measurement,
+              PROJECT_ID, prefixExporterOptions.metricPrefix);
+        });
       });
     });
 
@@ -401,7 +395,7 @@ describe('Stackdriver Stats Exporter', function() {
                .reply(443, 'Simulated Network Error');
 
            const failExporter = new StackdriverStatsExporter({
-             delay: 0,
+             period: 0,
              projectId: PROJECT_ID,
              onMetricUploadError: (err) => {
                assert.ok(err.message.indexOf('Simulated Network Error') >= 0);

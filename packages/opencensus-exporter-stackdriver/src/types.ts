@@ -36,8 +36,11 @@ export type TranslatedSpan = {
  * Options for stackdriver configuration
  */
 export interface StackdriverExporterOptions extends ExporterConfig {
-  /** Delay in milliseconds */
-  delay?: number;
+  /**
+   * Period in milliseconds sets the interval between uploading aggregated
+   * metrics to stackdriver. Optional, default to 1 minute.
+   */
+  period?: number;
   /**
    * projectId project id defined to stackdriver
    */
@@ -48,6 +51,10 @@ export interface StackdriverExporterOptions extends ExporterConfig {
    */
   metricPrefix?: string;
 
+  /**
+   * Is called whenever the exporter fails to upload metrics to stackdriver.
+   * Optional
+   */
   onMetricUploadError?: (err: Error) => void;
 }
 
